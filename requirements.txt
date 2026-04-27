@@ -1,3 +1,5 @@
 # Use Python 3.14 for this project.
 fastapi
 uvicorn[standard]
+pytest
+httpx
