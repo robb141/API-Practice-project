@@ -1,0 +1,4 @@
+# Runtime dependencies only.
+# Test tools like pytest and httpx stay in requirements.txt for local testing.
+fastapi
+uvicorn[standard]
