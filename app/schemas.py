@@ -1,11 +1,16 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class TaskBase(BaseModel):
     """Fields that are shared by task request and response models."""
 
-    title: str
+    # A task needs a real title. Field(...) lets Pydantic validate the value
+    # before the route function runs.
+    title: str = Field(..., min_length=1, max_length=200)
     completed: bool = False
+
+    # Reject unexpected JSON fields so clients notice typos early.
+    model_config = ConfigDict(extra="forbid")
 
 
 class TaskCreate(TaskBase):
@@ -14,15 +19,10 @@ class TaskCreate(TaskBase):
     pass
 
 
-class TaskUpdate(BaseModel):
-    """Data the client can send when updating an existing task.
+class TaskUpdate(TaskBase):
+    """Data the client sends when replacing an existing task."""
 
-    Both fields are optional so a client can update just the title or just
-    the completed status.
-    """
-
-    title: str | None = None
-    completed: bool | None = None
+    pass
 
 
 class Task(TaskBase):
