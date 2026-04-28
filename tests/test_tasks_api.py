@@ -1,5 +1,13 @@
+from pathlib import Path
+import sys
+
 import pytest
 from fastapi.testclient import TestClient
+
+# Make this file work both with `pytest` and with
+# `python3 tests/test_tasks_api.py` from the project root.
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_ROOT))
 
 from app import routes
 from app.main import app
@@ -61,6 +69,21 @@ def test_create_task_requires_title() -> None:
     assert response.status_code == 422
 
 
+def test_create_task_rejects_empty_title() -> None:
+    response = client.post("/tasks", json={"title": ""})
+
+    assert response.status_code == 422
+
+
+def test_create_task_rejects_unknown_fields() -> None:
+    response = client.post(
+        "/tasks",
+        json={"title": "Learn FastAPI", "priority": "high"},
+    )
+
+    assert response.status_code == 422
+
+
 def test_list_tasks_returns_created_tasks() -> None:
     client.post("/tasks", json={"title": "First task"})
     client.post("/tasks", json={"title": "Second task", "completed": True})
@@ -91,20 +114,20 @@ def test_update_task() -> None:
     }
 
 
-def test_update_task_can_update_one_field() -> None:
+def test_update_task_replaces_the_whole_task() -> None:
     create_response = client.post(
         "/tasks",
-        json={"title": "Keep this title", "completed": False},
+        json={"title": "Old title", "completed": True},
     )
     task_id = create_response.json()["id"]
 
-    response = client.put(f"/tasks/{task_id}", json={"completed": True})
+    response = client.put(f"/tasks/{task_id}", json={"title": "New title"})
 
     assert response.status_code == 200
     assert response.json() == {
         "id": task_id,
-        "title": "Keep this title",
-        "completed": True,
+        "title": "New title",
+        "completed": False,
     }
 
 
@@ -146,3 +169,7 @@ def test_task_id_must_be_an_integer() -> None:
     response = client.delete("/tasks/not-an-integer")
 
     assert response.status_code == 422
+
+
+if __name__ == "__main__":
+    raise SystemExit(pytest.main([__file__]))

@@ -9,3 +9,6 @@ services:
     # Map localhost:8000 on your computer to port 8000 in the container.
     ports:
       - "8000:8000"
+
+    # Restart automatically if the process crashes during local testing.
+    restart: unless-stopped

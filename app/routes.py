@@ -42,7 +42,7 @@ def create_task(task_data: TaskCreate) -> Task:
 
 @router.put("/tasks/{task_id}", response_model=Task)
 def update_task(task_id: int, task_data: TaskUpdate) -> Task:
-    """Update an existing task by ID."""
+    """Replace an existing task by ID."""
 
     if task_id not in tasks:
         raise HTTPException(
@@ -50,11 +50,9 @@ def update_task(task_id: int, task_data: TaskUpdate) -> Task:
             detail="Task not found",
         )
 
-    existing_task = tasks[task_id]
-
-    # exclude_unset=True keeps fields the client did not send unchanged.
-    updated_values = task_data.model_dump(exclude_unset=True)
-    updated_task = existing_task.model_copy(update=updated_values)
+    # PUT usually means "replace the whole resource".
+    # The ID stays the same because it comes from the URL path.
+    updated_task = Task(id=task_id, **task_data.model_dump())
     tasks[task_id] = updated_task
 
     return updated_task
