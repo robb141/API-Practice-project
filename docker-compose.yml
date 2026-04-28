@@ -1,0 +1,11 @@
+services:
+  api:
+    # Build the image from the Dockerfile in this project.
+    build: .
+
+    # Give the running container an easy-to-recognize name.
+    container_name: task-api
+
+    # Map localhost:8000 on your computer to port 8000 in the container.
+    ports:
+      - "8000:8000"
